@@ -6,11 +6,13 @@ import 'package:shop/utils/app_routes.dart';
 import 'package:shop/views/cart_screen.dart';
 import 'package:shop/views/oders_screen.dart';
 import 'package:shop/views/product_detail_screen.dart';
+import 'package:shop/views/products_screen.dart';
 
 import './providers/products.dart';
+import './views/product_form_screen.dart';
 import './views/products_overview_screen.dart';
 
-//parei no modulo 8 aula 25 (iniciar a aula 26)
+//parei no modulo 9 aula 18 (iniciar a aula 19)
 void main() => runApp(MyApp());
 
 class MyApp extends StatelessWidget {
@@ -43,6 +45,8 @@ class MyApp extends StatelessWidget {
           AppRoutes.PRODUCT_DETAIL: (ctx) => ProductDetailScreen(),
           AppRoutes.CART: (ctx) => CartScreen(),
           AppRoutes.ORDERS: (ctx) => OrderScreen(),
+          AppRoutes.PRODUCTS: (ctx) => ProductsScreen(),
+          AppRoutes.PRODUCT_FORM: (ctx) => ProductFormScreen(),
         },
       ),
     );

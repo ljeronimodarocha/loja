@@ -9,7 +9,7 @@ class Product with ChangeNotifier {
   bool isFavorite;
 
   Product(
-      {@required this.id,
+      {this.id,
       @required this.title,
       @required this.description,
       @required this.price,
@@ -19,5 +19,10 @@ class Product with ChangeNotifier {
   void toggleFavorite() {
     this.isFavorite = !this.isFavorite;
     notifyListeners();
+  }
+
+  @override
+  String toString() {
+    return 'Product{id: $id, title: $title, description: $description, price: $price, imageUrl: $imageUrl, isFavorite: $isFavorite}';
   }
 }
