@@ -13,7 +13,8 @@ class ProductItem extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListTile(
       leading: CircleAvatar(
-        backgroundImage: NetworkImage(product.imageUrl),
+        backgroundImage:
+            product.imageUrl.isEmpty ? null : NetworkImage(product.imageUrl),
       ),
       title: Text(product.title),
       trailing: Container(
@@ -27,7 +28,7 @@ class ProductItem extends StatelessWidget {
                   arguments: product,
                 );
               },
-              icon: Icon(Icons.edit),
+              icon: const Icon(Icons.edit),
               color: Theme.of(context).colorScheme.primary,
             ),
             IconButton(
@@ -35,23 +36,29 @@ class ProductItem extends StatelessWidget {
                 showDialog(
                     context: context,
                     builder: (ctx) => AlertDialog(
-                          title: Text('Excluir Produto'),
-                          content: Text('Tem certeza?'),
+                          title: const Text('Excluir Produto'),
+                          content: const Text('Tem certeza?'),
                           actions: [
                             TextButton(
                                 onPressed: () {
                                   Navigator.of(context).pop();
                                 },
-                                child: Text('Não')),
+                                child: const Text('Não')),
                             TextButton(
                                 onPressed: () {
-                                  Provider.of<Products>(context, listen: false)
-                                      .deleteProduct(product.id);
-                                  Navigator.of(context).pop();
+                                  Navigator.of(context).pop(true);
                                 },
-                                child: Text('Sim')),
+                                child: const Text('Sim')),
                           ],
-                        ));
+                        )).then((value) async {
+                  try {
+                    await Provider.of<Products>(context, listen: false)
+                        .deleteProduct(product.id);
+                  } catch (error) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text(error.toString())));
+                  }
+                });
               },
               icon: Icon(Icons.delete),
               color: Theme.of(context).errorColor,

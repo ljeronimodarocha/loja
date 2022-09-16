@@ -1,6 +1,8 @@
-import 'dart:math';
+import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'package:shop/utils/consttants.dart';
 
 import 'cart.dart';
 
@@ -16,6 +18,8 @@ class Order {
 class Orders with ChangeNotifier {
   List<Order> _items = [];
 
+  final String _baseUrl = '${Constants.BASE_API_URL}/orders.json';
+
   List<Order> get items {
     return [..._items];
   }
@@ -24,16 +28,59 @@ class Orders with ChangeNotifier {
     return _items.length;
   }
 
-  void addOrder(Cart cart) {
+  Future<void> addOrder(Cart cart) async {
+    final date = DateTime.now();
+    final response = await http.post(Uri.parse(_baseUrl),
+        body: jsonEncode({
+          'total': cart.totalAmount,
+          'date': date.toIso8601String(),
+          'products': cart.items.values
+              .map((cartItem) => {
+                    'id': cartItem.id,
+                    'productId': cartItem.productId,
+                    'title': cartItem.title,
+                    'quantity': cartItem.quantity,
+                    'price': cartItem.price,
+                  })
+              .toList(),
+        }));
+
     _items.insert(
       0,
       Order(
-        id: Random().nextDouble().toString(),
+        id: jsonDecode(response.body)['name'],
         total: cart.totalAmount,
         products: cart.items.values.toList(),
-        date: DateTime.now(),
+        date: date,
       ),
     );
     notifyListeners();
+  }
+
+  Future<void> loadOrders() async {
+    List<Order> loadeditems = [];
+    final response = await http.get(Uri.parse("$_baseUrl"));
+    Map<String, dynamic> data = jsonDecode(response.body);
+    loadeditems.clear();
+    if (data != null) {
+      data.forEach((orderId, orderData) {
+        loadeditems.add(Order(
+            id: orderId,
+            total: orderData['total'],
+            date: DateTime.parse(orderData['date']),
+            products: (orderData['products'] as List<dynamic>).map((item) {
+              return CartItem(
+                  id: item['id'],
+                  productId: item['productId'],
+                  title: item['title'],
+                  quantity: item['quantity'],
+                  price: item['price']);
+            }).toList()));
+      });
+      notifyListeners();
+    }
+
+    _items = loadeditems.reversed.toList();
+    return Future.value();
   }
 }

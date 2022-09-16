@@ -1,12 +1,16 @@
-import 'dart:math';
+import 'dart:convert';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 
-import '../data/dummy_data.dart';
+import '../utils/consttants.dart';
 import 'product.dart';
 
 class Products with ChangeNotifier {
-  List<Product> _items = DUMMY_PRODUCTS;
+  final String _baseUrl = '${Constants.BASE_API_URL}//products';
+
+  List<Product> _items = [];
 
   List<Product> get items => [..._items];
 
@@ -14,9 +18,41 @@ class Products with ChangeNotifier {
     return _items.where((prod) => prod.isFavorite).toList();
   }
 
-  void addProduct(Product newProduct) {
+  Future<void> loadProducts() async {
+    final response = await http.get(Uri.parse("$_baseUrl.json"));
+    Map<String, dynamic> data = jsonDecode(response.body);
+    _items.clear();
+    if (data != null) {
+      data.forEach((productID, productData) {
+        _items.add(Product(
+          id: productID,
+          title: productData['title'],
+          description: productData['description'],
+          price: productData['price'],
+          imageUrl: productData['imageUrl'],
+          isFavorite: productData['isFavorite'],
+        ));
+      });
+      notifyListeners();
+    }
+    return Future.value();
+  }
+
+  Future<void> addProduct(Product newProduct) async {
+    final response = await http.post(Uri.parse("$_baseUrl.json"),
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+        },
+        body: jsonEncode({
+          'title': newProduct.title,
+          'description': newProduct.description,
+          'price': newProduct.price,
+          'imageUrl': newProduct.imageUrl,
+          'isFavorite': newProduct.isFavorite,
+        }));
+
     _items.add(Product(
-      id: Random().nextDouble().toString(),
+      id: json.decode(response.body)['name'],
       title: newProduct.title,
       description: newProduct.description,
       price: newProduct.price,
@@ -25,23 +61,39 @@ class Products with ChangeNotifier {
     notifyListeners();
   }
 
-  void updateProduct(Product product) {
+  Future<void> updateProduct(Product product) async {
     if (product == null || product.id == null) {
       return;
     }
 
     final index = _items.indexWhere((prod) => prod.id == product.id);
     if (index >= 0) {
+      await http.patch(Uri.parse("$_baseUrl/${product.id}.json"),
+          body: jsonEncode({
+            'title': product.title,
+            'description': product.description,
+            'price': product.price,
+            'imageUrl': product.imageUrl,
+            'isFavorite': product.isFavorite,
+          }));
       _items[index] = product;
       notifyListeners();
     }
   }
 
-  void deleteProduct(String id) {
+  Future<void> deleteProduct(String id) async {
     final index = _items.indexWhere((prod) => prod.id == id);
     if (index >= 0) {
-      _items.removeWhere((prod) => prod.id == id);
+      final product = _items[index];
+      _items.remove(product);
       notifyListeners();
+      final response =
+          await http.delete(Uri.parse("$_baseUrl/${product.id}.json"));
+      if (response.statusCode >= 400) {
+        _items.insert(index, product);
+        notifyListeners();
+        throw HttpException("Ocorreu um erro ao excluir o produto");
+      }
     }
   }
 

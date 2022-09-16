@@ -12,7 +12,7 @@ import './providers/products.dart';
 import './views/product_form_screen.dart';
 import './views/products_overview_screen.dart';
 
-//parei no modulo 9 aula 18 (iniciar a aula 19)
+//parei no modulo 10 aula 26 (dinalizado modulo 10)
 void main() => runApp(MyApp());
 
 class MyApp extends StatelessWidget {
