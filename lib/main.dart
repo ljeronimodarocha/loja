@@ -4,6 +4,7 @@ import 'package:shop/providers/auth.dart';
 import 'package:shop/providers/cart.dart';
 import 'package:shop/providers/orders.dart';
 import 'package:shop/utils/app_routes.dart';
+import 'package:shop/utils/custom_route.dart';
 import 'package:shop/views/auth_home.dart';
 import 'package:shop/views/cart_screen.dart';
 import 'package:shop/views/oders_screen.dart';
@@ -14,7 +15,7 @@ import 'package:shop/views/products_screen.dart';
 import './providers/products.dart';
 import './views/product_form_screen.dart';
 
-//parei no modulo 11 aula 15(iniciar aula 11)
+//parei no modulo 12 aula 1(iniciar aula 1)
 void main() => runApp(MyApp());
 
 class MyApp extends StatelessWidget {
@@ -42,6 +43,11 @@ class MyApp extends StatelessWidget {
       child: MaterialApp(
         title: 'Minha Loja',
         theme: ThemeData(
+            pageTransitionsTheme: PageTransitionsTheme(
+              builders: {
+                TargetPlatform.android: CustomPageTransitionsBuilder(),
+              },
+            ),
             colorScheme: ColorScheme.fromSwatch(
               primarySwatch: Colors.purple,
             ).copyWith(
